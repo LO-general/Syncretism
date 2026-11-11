@@ -112,6 +112,10 @@
             box-shadow: 0 0 15px rgba(139, 92, 246, 0.3);
         }
 
+        .auth-input.hidden-field {
+            display: none;
+        }
+
         .auth-btn {
             width: 100%;
             background: #7c3aed;
@@ -358,6 +362,8 @@
             
             <input type="email" id="authEmail" class="auth-input" placeholder="Adresse email" />
             <input type="password" id="authPassword" class="auth-input" placeholder="Mot de passe" />
+            <!-- Champ de confirmation du mot de passe (visible uniquement à l'inscription) -->
+            <input type="password" id="authPasswordConfirm" class="auth-input hidden-field" placeholder="Confirmer le mot de passe" />
             
             <button class="auth-btn" id="authSubmitBtn" onclick="handleAuth()">Se connecter</button>
             
@@ -455,6 +461,7 @@
         const authSwitchText = document.getElementById('authSwitchText');
         const authEmail = document.getElementById('authEmail');
         const authPassword = document.getElementById('authPassword');
+        const authPasswordConfirm = document.getElementById('authPasswordConfirm');
         const welcomeUser = document.getElementById('welcomeUser');
 
         function checkAuthSession() {
@@ -473,11 +480,13 @@
                 authTitle.textContent = "Inscription";
                 authSubtitle.textContent = "Créez votre espace personnel sécurisé";
                 authSubmitBtn.textContent = "S'inscrire";
+                authPasswordConfirm.classList.remove('hidden-field');
                 authSwitchText.innerHTML = `Déjà un compte ? <span onclick="toggleAuthMode()">Se connecter</span>`;
             } else {
                 authTitle.textContent = "Connexion";
                 authSubtitle.textContent = "Accédez à votre espace Syncretism";
                 authSubmitBtn.textContent = "Se connecter";
+                authPasswordConfirm.classList.add('hidden-field');
                 authSwitchText.innerHTML = `Pas encore de compte ? <span onclick="toggleAuthMode()">S'inscrire</span>`;
             }
         }
@@ -485,6 +494,7 @@
         function handleAuth() {
             const email = authEmail.value.trim().toLowerCase();
             const password = authPassword.value.trim();
+            const passwordConfirm = authPasswordConfirm.value.trim();
 
             if (!email || !password) {
                 alert("Veuillez remplir tous les champs.");
@@ -494,6 +504,10 @@
             let users = JSON.parse(localStorage.getItem('syncretism_users_db')) || {};
 
             if (isRegisterMode) {
+                if (password !== passwordConfirm) {
+                    alert("Les mots de passe ne correspondent pas. Veuillez vérifier.");
+                    return;
+                }
                 if (users[email]) {
                     alert("Cet email existe déjà. Veuillez vous connecter.");
                     return;
@@ -511,6 +525,7 @@
                 localStorage.setItem('syncretism_current_user', currentUser);
                 authEmail.value = '';
                 authPassword.value = '';
+                authPasswordConfirm.value = '';
                 checkAuthSession();
             }
         }
