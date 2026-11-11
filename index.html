@@ -1,0 +1,643 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Syncretism</title>
+    
+    <!-- Google Tag Manager / Analytics -->
+    <script async src="https://www.googletagmanager.com/gtm.js?id=GTM-MWJ4GJLC"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+    </script>
+
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body, html {
+            width: 100%; height: 100%;
+            overflow: hidden;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: #050308;
+            color: #f3e8ff;
+        }
+
+        /* Fond animé fluide aux ondes violettes */
+        .bg-canvas {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            z-index: 1;
+            background: radial-gradient(circle at 30% 30%, #1e1135 0%, #0a0512 50%, #030107 100%);
+        }
+
+        .wave-layer {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            z-index: 2;
+            opacity: 0.6;
+            pointer-events: none;
+            background: 
+                radial-gradient(ellipse at 80% 20%, rgba(139, 92, 246, 0.15) 0%, transparent 50%),
+                radial-gradient(ellipse at 20% 80%, rgba(88, 28, 135, 0.25) 0%, transparent 60%);
+        }
+
+        .overlay-gradient {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: radial-gradient(circle at 50% 70%, rgba(76, 29, 149, 0.1), rgba(5, 3, 8, 0.85) 85%);
+            z-index: 3;
+            pointer-events: none;
+        }
+
+        /* Écran de Connexion / Inscription */
+        .auth-container {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            z-index: 50;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            background: rgba(5, 3, 8, 0.75);
+            backdrop-filter: blur(15px);
+            transition: opacity 0.5s ease;
+        }
+
+        .auth-container.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .auth-box {
+            background: rgba(20, 15, 30, 0.8);
+            border: 1px solid rgba(139, 92, 246, 0.3);
+            border-radius: 24px;
+            padding: 40px 30px;
+            width: 100%;
+            max-width: 400px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(25px);
+            text-align: center;
+        }
+
+        .auth-box h2 {
+            font-size: 1.8rem;
+            font-weight: 400;
+            color: #ede9fe;
+            margin-bottom: 8px;
+        }
+
+        .auth-box p {
+            font-size: 0.9rem;
+            color: #a78bfa;
+            margin-bottom: 30px;
+        }
+
+        .auth-input {
+            width: 100%;
+            background: rgba(10, 7, 18, 0.6);
+            border: 1px solid rgba(139, 92, 246, 0.25);
+            border-radius: 12px;
+            padding: 14px 18px;
+            color: #f3e8ff;
+            font-size: 1rem;
+            margin-bottom: 15px;
+            outline: none;
+            transition: all 0.3s;
+        }
+
+        .auth-input:focus {
+            border-color: rgba(167, 139, 250, 0.8);
+            box-shadow: 0 0 15px rgba(139, 92, 246, 0.3);
+        }
+
+        .auth-btn {
+            width: 100%;
+            background: #7c3aed;
+            color: white;
+            border: none;
+            border-radius: 12px;
+            padding: 14px;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            box-shadow: 0 0 20px rgba(124, 58, 237, 0.5);
+            transition: background 0.2s, transform 0.2s;
+            margin-top: 10px;
+        }
+
+        .auth-btn:hover {
+            background: #6d28d9;
+            transform: translateY(-1px);
+        }
+
+        .auth-switch {
+            margin-top: 20px;
+            font-size: 0.85rem;
+            color: #9ca3af;
+        }
+
+        .auth-switch span {
+            color: #c084fc;
+            cursor: pointer;
+            text-decoration: underline;
+        }
+
+        /* Interface principale de l'application */
+        .app-container {
+            position: relative;
+            z-index: 10;
+            width: 100%; height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: center;
+            padding: 40px 20px;
+            transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        header {
+            text-align: center;
+            transition: opacity 0.4s ease, transform 0.4s ease;
+        }
+
+        header.hidden {
+            opacity: 0;
+            transform: translateY(-20px);
+            pointer-events: none;
+        }
+
+        h1 {
+            font-size: 1.8rem;
+            font-weight: 400;
+            letter-spacing: 0.05em;
+            color: #ede9fe;
+            margin-bottom: 8px;
+            text-shadow: 0 2px 20px rgba(139, 92, 246, 0.4);
+        }
+
+        p.subtitle {
+            font-size: 0.95rem;
+            color: #a78bfa;
+            opacity: 0.8;
+        }
+
+        /* Boutons du haut (Dossiers + Déconnexion) */
+        .top-nav {
+            position: fixed;
+            top: 24px; right: 24px;
+            display: flex;
+            gap: 10px;
+            z-index: 20;
+        }
+
+        .action-btn {
+            background: rgba(30, 20, 50, 0.5);
+            border: 1px solid rgba(139, 92, 246, 0.3);
+            color: #e9d5ff;
+            padding: 10px 18px;
+            border-radius: 999px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+
+        .action-btn:hover {
+            background: rgba(76, 29, 149, 0.6);
+            border-color: rgba(167, 139, 250, 0.6);
+            box-shadow: 0 0 20px rgba(139, 92, 246, 0.3);
+        }
+
+        /* Barre de saisie ovale épurée */
+        .input-wrapper {
+            width: 100%;
+            max-width: 600px;
+            margin-bottom: 40px;
+            transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .input-box {
+            display: flex;
+            align-items: center;
+            background: rgba(20, 15, 30, 0.65);
+            border: 1px solid rgba(139, 92, 246, 0.3);
+            border-radius: 999px;
+            padding: 12px 20px;
+            backdrop-filter: blur(20px);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .input-box:focus-within {
+            border-color: rgba(167, 139, 250, 0.9);
+            box-shadow: 0 0 35px rgba(139, 92, 246, 0.5);
+            background: rgba(30, 20, 50, 0.85);
+        }
+
+        .input-box input {
+            flex: 1;
+            background: transparent;
+            border: none;
+            outline: none;
+            color: #f3e8ff;
+            font-size: 1rem;
+            padding: 0 10px;
+        }
+
+        .input-box input::placeholder {
+            color: rgba(216, 180, 254, 0.4);
+        }
+
+        .send-btn {
+            background: #7c3aed;
+            color: white;
+            border: none;
+            width: 38px; height: 38px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 0 15px rgba(124, 58, 237, 0.6);
+            transition: transform 0.2s;
+        }
+
+        .send-btn:hover {
+            transform: scale(1.05);
+            background: #6d28d9;
+        }
+
+        /* Panneau Latéral "Mes dossiers" */
+        .sidebar {
+            position: fixed;
+            top: 0; right: -420px;
+            width: 400px; height: 100%;
+            background: rgba(15, 10, 25, 0.92);
+            backdrop-filter: blur(30px);
+            border-left: 1px solid rgba(139, 92, 246, 0.2);
+            z-index: 100;
+            box-shadow: -20px 0 50px rgba(0, 0, 0, 0.7);
+            transition: right 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            display: flex;
+            flex-direction: column;
+            padding: 30px;
+        }
+
+        .sidebar.open { right: 0; }
+
+        .sidebar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            border-bottom: 1px solid rgba(139, 92, 246, 0.2);
+            padding-bottom: 15px;
+        }
+
+        .sidebar-header h2 { font-size: 1.2rem; font-weight: 500; color: #ede9fe; }
+
+        .close-sidebar {
+            background: none; border: none; color: #a78bfa; font-size: 1.5rem; cursor: pointer;
+        }
+
+        .folders-list {
+            flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 15px;
+        }
+
+        .folder-card {
+            background: rgba(30, 20, 50, 0.4);
+            border: 1px solid rgba(139, 92, 246, 0.2);
+            border-radius: 12px;
+            padding: 15px;
+            transition: all 0.2s;
+        }
+
+        .folder-card:hover {
+            border-color: rgba(167, 139, 250, 0.5);
+            background: rgba(40, 25, 65, 0.5);
+        }
+
+        .folder-title { font-weight: 600; color: #c084fc; margin-bottom: 6px; font-size: 1rem; text-transform: capitalize; }
+        .folder-summary { font-size: 0.85rem; color: #d8b4fe; opacity: 0.9; margin-bottom: 10px; line-height: 1.4; font-style: italic; background: rgba(139, 92, 246, 0.1); padding: 8px 12px; border-radius: 8px; border-left: 3px solid #a78bfa; }
+        .folder-items { font-size: 0.75rem; color: #9ca3af; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 6px; }
+
+        /* Notification de classement */
+        .toast {
+            position: fixed;
+            bottom: 100px;
+            background: rgba(76, 29, 149, 0.85);
+            backdrop-filter: blur(10px);
+            color: #f3e8ff;
+            padding: 10px 20px;
+            border-radius: 999px;
+            font-size: 0.85rem;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.4);
+            opacity: 0;
+            transform: translateY(10px);
+            transition: all 0.3s ease;
+            pointer-events: none;
+            z-index: 1000;
+        }
+        .toast.show { opacity: 1; transform: translateY(0); }
+    </style>
+</head>
+<body>
+
+    <!-- Arrière-plan animé fluide -->
+    <canvas class="bg-canvas" id="bgCanvas"></canvas>
+    <div class="wave-layer"></div>
+    <div class="overlay-gradient"></div>
+
+    <!-- Écran de Connexion / Inscription -->
+    <div class="auth-container" id="authContainer">
+        <div class="auth-box">
+            <h2 id="authTitle">Connexion</h2>
+            <p id="authSubtitle">Accédez à votre espace Syncretism</p>
+            
+            <input type="email" id="authEmail" class="auth-input" placeholder="Adresse email" />
+            <input type="password" id="authPassword" class="auth-input" placeholder="Mot de passe" />
+            
+            <button class="auth-btn" id="authSubmitBtn" onclick="handleAuth()">Se connecter</button>
+            
+            <div class="auth-switch" id="authSwitchText">
+                Pas encore de compte ? <span onclick="toggleAuthMode()">S'inscrire</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Navigation du haut -->
+    <div class="top-nav">
+        <button class="action-btn" onclick="toggleSidebar()">Mes dossiers</button>
+        <button class="action-btn" onclick="logout()" style="background: rgba(150, 30, 30, 0.4); border-color: rgba(239, 68, 68, 0.3);">Déconnexion</button>
+    </div>
+
+    <!-- Application Principale -->
+    <div class="app-container" id="appContainer">
+        <header id="mainHeader">
+            <h1>Syncretism</h1>
+            <p class="subtitle" id="welcomeUser">Le premier mot nomme le dossier, l'IA résume.</p>
+        </header>
+
+        <div class="input-wrapper">
+            <div class="input-box">
+                <input type="text" id="ideaInput" placeholder="Ex: TikTok concept vidéo..." onfocus="activateFocus()" onblur="checkBlur()" />
+                <button class="send-btn" onclick="submitIdea()" title="Envoyer">
+                    <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"></path></svg>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Panneau Latéral "Mes dossiers" -->
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <h2>Mes Dossiers & Résumés</h2>
+            <button class="close-sidebar" onclick="toggleSidebar()">&times;</button>
+        </div>
+        <div class="folders-list" id="foldersList"></div>
+    </div>
+
+    <div class="toast" id="toast">Idée classée dans le dossier !</div>
+
+    <script>
+        // Animation des vagues violettes en arrière-plan (Accélérée à 0.008)
+        const canvas = document.getElementById('bgCanvas');
+        const ctx = canvas.getContext('2d');
+        let width, height;
+        let step = 0;
+
+        function resize() {
+            width = canvas.width = window.innerWidth;
+            height = canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resize);
+        resize();
+
+        function drawWaves() {
+            ctx.clearRect(0, 0, width, height);
+            step += 0.008;
+
+            for (let i = 0; i < 4; i++) {
+                ctx.beginPath();
+                ctx.moveTo(0, height);
+                
+                for (let x = 0; x < width; x += 20) {
+                    let y = height * 0.5 + 
+                            Math.sin(x * 0.003 + step + i) * 80 + 
+                            Math.cos(x * 0.002 - step * 0.5) * 60 + 
+                            i * 50;
+                    ctx.lineTo(x, y);
+                }
+                
+                ctx.lineTo(width, height);
+                ctx.closePath();
+
+                let grad = ctx.createLinearGradient(0, 0, width, height);
+                grad.addColorStop(0, `rgba(76, 29, 149, ${0.08 + i * 0.04})`);
+                grad.addColorStop(1, `rgba(20, 10, 35, ${0.4 + i * 0.1})`);
+                ctx.fillStyle = grad;
+                ctx.fill();
+            }
+            requestAnimationFrame(drawWaves);
+        }
+        drawWaves();
+
+        // Gestion de l'authentification et des utilisateurs multiples
+        let isRegisterMode = false;
+        let currentUser = localStorage.getItem('syncretism_current_user');
+
+        const authContainer = document.getElementById('authContainer');
+        const authTitle = document.getElementById('authTitle');
+        const authSubtitle = document.getElementById('authSubtitle');
+        const authSubmitBtn = document.getElementById('authSubmitBtn');
+        const authSwitchText = document.getElementById('authSwitchText');
+        const authEmail = document.getElementById('authEmail');
+        const authPassword = document.getElementById('authPassword');
+        const welcomeUser = document.getElementById('welcomeUser');
+
+        function checkAuthSession() {
+            if (currentUser) {
+                authContainer.classList.add('hidden');
+                welcomeUser.textContent = `Connecté en tant que : ${currentUser}`;
+                loadUserFolders();
+            } else {
+                authContainer.classList.remove('hidden');
+            }
+        }
+
+        function toggleAuthMode() {
+            isRegisterMode = !isRegisterMode;
+            if (isRegisterMode) {
+                authTitle.textContent = "Inscription";
+                authSubtitle.textContent = "Créez votre espace personnel sécurisé";
+                authSubmitBtn.textContent = "S'inscrire";
+                authSwitchText.innerHTML = `Déjà un compte ? <span onclick="toggleAuthMode()">Se connecter</span>`;
+            } else {
+                authTitle.textContent = "Connexion";
+                authSubtitle.textContent = "Accédez à votre espace Syncretism";
+                authSubmitBtn.textContent = "Se connecter";
+                authSwitchText.innerHTML = `Pas encore de compte ? <span onclick="toggleAuthMode()">S'inscrire</span>`;
+            }
+        }
+
+        function handleAuth() {
+            const email = authEmail.value.trim().toLowerCase();
+            const password = authPassword.value.trim();
+
+            if (!email || !password) {
+                alert("Veuillez remplir tous les champs.");
+                return;
+            }
+
+            let users = JSON.parse(localStorage.getItem('syncretism_users_db')) || {};
+
+            if (isRegisterMode) {
+                if (users[email]) {
+                    alert("Cet email existe déjà. Veuillez vous connecter.");
+                    return;
+                }
+                users[email] = { password: password, folders: {} };
+                localStorage.setItem('syncretism_users_db', JSON.stringify(users));
+                alert("Compte créé avec succès ! Connectez-vous.");
+                toggleAuthMode();
+            } else {
+                if (!users[email] || users[email].password !== password) {
+                    alert("Email ou mot de passe incorrect.");
+                    return;
+                }
+                currentUser = email;
+                localStorage.setItem('syncretism_current_user', currentUser);
+                authEmail.value = '';
+                authPassword.value = '';
+                checkAuthSession();
+            }
+        }
+
+        function logout() {
+            localStorage.removeItem('syncretism_current_user');
+            currentUser = null;
+            authContainer.classList.remove('hidden');
+            if(sidebar.classList.contains('open')) toggleSidebar();
+        }
+
+        // Gestion des dossiers par utilisateur
+        let folders = {};
+
+        function loadUserFolders() {
+            if (!currentUser) return;
+            let users = JSON.parse(localStorage.getItem('syncretism_users_db')) || {};
+            if (users[currentUser]) {
+                folders = users[currentUser].folders || {};
+            }
+            updateSidebarUI();
+        }
+
+        function saveUserFolders() {
+            if (!currentUser) return;
+            let users = JSON.parse(localStorage.getItem('syncretism_users_db')) || {};
+            if (users[currentUser]) {
+                users[currentUser].folders = folders;
+                localStorage.setItem('syncretism_users_db', JSON.stringify(users));
+            }
+        }
+
+        const inputField = document.getElementById('ideaInput');
+        const header = document.getElementById('mainHeader');
+        const sidebar = document.getElementById('sidebar');
+        const foldersList = document.getElementById('foldersList');
+        const toast = document.getElementById('toast');
+
+        function activateFocus() {
+            header.classList.add('hidden');
+        }
+
+        function checkBlur() {
+            if (inputField.value.trim() === '') {
+                header.classList.remove('hidden');
+            }
+        }
+
+        inputField.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                submitIdea();
+            }
+        });
+
+        function generateAISummary(items) {
+            if (items.length === 1) {
+                return `Objectif principal : ${items[0]}`;
+            } else if (items.length === 2) {
+                return `Synthèse : Axé sur "${items[0]}" avec un focus complémentaire sur "${items[1]}".`;
+            } else {
+                return `Résumé global (${items.length} idées consolidées) : Regroupe les axes autour de "${items[0]}" et de ses évolutions.`;
+            }
+        }
+
+        function submitIdea() {
+            const text = inputField.value.trim();
+            if (!text) return;
+
+            const words = text.split(/\s+/);
+            let folderName = words[0].replace(/[^a-zA-Z0-9À-ÿ]/g, "").toLowerCase();
+            let cleanContent = words.slice(1).join(' ');
+
+            if (!folderName) folderName = "général";
+            if (!cleanContent) cleanContent = text;
+
+            if (!folders[folderName]) {
+                folders[folderName] = { items: [], summary: "" };
+            }
+            folders[folderName].items.push(cleanContent);
+            folders[folderName].summary = generateAISummary(folders[folderName].items);
+
+            saveUserFolders();
+
+            inputField.value = '';
+            header.classList.remove('hidden');
+            inputField.blur();
+
+            showToast(`Classé dans [${folderName}]`);
+            updateSidebarUI();
+        }
+
+        function showToast(msg) {
+            toast.textContent = msg;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 2500);
+        }
+
+        function toggleSidebar() {
+            sidebar.classList.toggle('open');
+            updateSidebarUI();
+        }
+
+        function updateSidebarUI() {
+            foldersList.innerHTML = '';
+            const keys = Object.keys(folders);
+            if (keys.length === 0) {
+                foldersList.innerHTML = '<p style="color: rgba(255,255,255,0.4); text-align: center; margin-top: 40px;">Aucun dossier pour le moment.</p>';
+                return;
+            }
+
+            keys.forEach(key => {
+                const folder = folders[key];
+                const notesListHTML = folder.items.map(item => `• ${item}`).join('<br>');
+                
+                const card = document.createElement('div');
+                card.className = 'folder-card';
+                card.innerHTML = `
+                    <div class="folder-title">📁 ${key}</div>
+                    <div class="folder-summary">✨ ${folder.summary}</div>
+                    <div class="folder-items"><strong>Notes enregistrées :</strong><br>${notesListHTML}</div>
+                `;
+                foldersList.appendChild(card);
+            });
+        }
+
+        // Lancement au démarrage
+        checkAuthSession();
+    </script>
+</body>
+</html>
