@@ -273,91 +273,92 @@
             background: #6d28d9;
         }
 
-        /* Panneau Latéral "Mes dossiers" - Translucide et harmonisé */
-        .sidebar {
+        /* Vue centrale "Mes dossiers" intégrée sur le fond dynamique */
+        .folders-view {
             position: fixed;
-            top: 0; right: -420px;
-            width: 400px; height: 100%;
-            background: rgba(15, 10, 25, 0.65);
-            backdrop-filter: blur(30px);
-            -webkit-backdrop-filter: blur(30px);
-            border-left: 1px solid rgba(139, 92, 246, 0.25);
-            z-index: 100;
-            box-shadow: -20px 0 50px rgba(0, 0, 0, 0.7);
-            transition: right 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            top: 0; left: 0; width: 100%; height: 100%;
+            z-index: 30;
             display: flex;
             flex-direction: column;
-            padding: 30px;
-        }
-
-        .sidebar.open { right: 0; }
-
-        .sidebar-header {
-            display: flex;
-            justify-content: space-between;
             align-items: center;
-            margin-bottom: 25px;
-            border-bottom: 1px solid rgba(139, 92, 246, 0.25);
-            padding-bottom: 15px;
+            padding: 90px 20px 40px 20px;
+            background: rgba(5, 3, 8, 0.6);
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.4s ease;
         }
 
-        .sidebar-header h2 { font-size: 1.2rem; font-weight: 500; color: #ede9fe; }
-
-        .close-sidebar {
-            background: none; border: none; color: #a78bfa; font-size: 1.5rem; cursor: pointer;
-            transition: transform 0.2s;
+        .folders-view.active {
+            opacity: 1;
+            pointer-events: auto;
         }
-        .close-sidebar:hover { transform: scale(1.1); color: #fff; }
 
-        .folders-list {
-            flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 15px;
-            padding-right: 5px;
+        .folders-header-title {
+            font-size: 1.6rem;
+            font-weight: 400;
+            color: #ede9fe;
+            margin-bottom: 20px;
+            text-align: center;
+            text-shadow: 0 2px 20px rgba(139, 92, 246, 0.4);
+        }
+
+        .folders-container {
+            width: 100%;
+            max-width: 700px;
+            flex: 1;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            padding-bottom: 30px;
         }
 
         /* Cartes de dossiers de style verre translucide homogène */
         .folder-card {
-            background: rgba(20, 15, 30, 0.55);
+            background: rgba(20, 15, 30, 0.6);
             border: 1px solid rgba(139, 92, 246, 0.3);
-            border-radius: 16px;
-            padding: 18px;
-            backdrop-filter: blur(15px);
-            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
+            border-radius: 20px;
+            padding: 24px;
+            backdrop-filter: blur(20px);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
             transition: all 0.3s ease;
         }
 
         .folder-card:hover {
             border-color: rgba(167, 139, 250, 0.7);
-            background: rgba(30, 20, 50, 0.75);
-            box-shadow: 0 0 25px rgba(139, 92, 246, 0.25);
+            background: rgba(30, 20, 50, 0.8);
+            box-shadow: 0 0 30px rgba(139, 92, 246, 0.3);
         }
 
         .folder-title { 
             font-weight: 500; 
             color: #ede9fe; 
-            margin-bottom: 8px; 
-            font-size: 1.05rem; 
+            margin-bottom: 10px; 
+            font-size: 1.2rem; 
             text-transform: capitalize; 
             letter-spacing: 0.03em;
         }
 
         .folder-summary { 
-            font-size: 0.85rem; 
+            font-size: 0.9rem; 
             color: #d8b4fe; 
-            margin-bottom: 12px; 
-            line-height: 1.4; 
+            margin-bottom: 14px; 
+            line-height: 1.5; 
             font-style: italic; 
             background: rgba(139, 92, 246, 0.12); 
-            padding: 10px 14px; 
-            border-radius: 10px; 
+            padding: 12px 16px; 
+            border-radius: 12px; 
             border-left: 3px solid #a78bfa; 
         }
 
         .folder-items { 
-            font-size: 0.8rem; 
+            font-size: 0.85rem; 
             color: #9ca3af; 
             border-top: 1px solid rgba(139, 92, 246, 0.15); 
-            padding-top: 8px; 
-            line-height: 1.4;
+            padding-top: 10px; 
+            line-height: 1.5;
         }
 
         /* Notification de classement */
@@ -407,7 +408,7 @@
 
     <!-- Navigation du haut -->
     <div class="top-nav">
-        <button class="action-btn" onclick="toggleSidebar()">Mes dossiers</button>
+        <button class="action-btn" id="navFoldersBtn" onclick="toggleFoldersView()">Mes dossiers</button>
         <button class="action-btn" onclick="logout()" style="background: rgba(150, 30, 30, 0.4); border-color: rgba(239, 68, 68, 0.3);">Déconnexion</button>
     </div>
 
@@ -428,13 +429,10 @@
         </div>
     </div>
 
-    <!-- Panneau Latéral "Mes dossiers" -->
-    <div class="sidebar" id="sidebar">
-        <div class="sidebar-header">
-            <h2>Mes Dossiers & Résumés</h2>
-            <button class="close-sidebar" onclick="toggleSidebar()">&times;</button>
-        </div>
-        <div class="folders-list" id="foldersList"></div>
+    <!-- Vue Centrale "Mes dossiers" sur le fond dynamique -->
+    <div class="folders-view" id="foldersView">
+        <div class="folders-header-title">Mes Dossiers & Résumés</div>
+        <div class="folders-container" id="foldersList"></div>
     </div>
 
     <div class="toast" id="toast">Idée classée dans le dossier !</div>
@@ -566,7 +564,7 @@
             localStorage.removeItem('syncretism_current_user');
             currentUser = null;
             authContainer.classList.remove('hidden');
-            if(sidebar.classList.contains('open')) toggleSidebar();
+            if(foldersView.classList.contains('active')) toggleFoldersView();
         }
 
         // Gestion des dossiers
@@ -578,7 +576,7 @@
             if (users[currentUser]) {
                 folders = users[currentUser].folders || {};
             }
-            updateSidebarUI();
+            updateFoldersUI();
         }
 
         function saveUserFolders() {
@@ -592,9 +590,11 @@
 
         const inputField = document.getElementById('ideaInput');
         const header = document.getElementById('mainHeader');
-        const sidebar = document.getElementById('sidebar');
+        const foldersView = document.getElementById('foldersView');
         const foldersList = document.getElementById('foldersList');
+        const navFoldersBtn = document.getElementById('navFoldersBtn');
         const toast = document.getElementById('toast');
+        let isFoldersOpen = false;
 
         function activateFocus() {
             header.classList.add('hidden');
@@ -646,7 +646,7 @@
             inputField.blur();
 
             showToast(`Classé dans [${folderName}]`);
-            updateSidebarUI();
+            updateFoldersUI();
         }
 
         function showToast(msg) {
@@ -655,16 +655,23 @@
             setTimeout(() => toast.classList.remove('show'), 2500);
         }
 
-        function toggleSidebar() {
-            sidebar.classList.toggle('open');
-            updateSidebarUI();
+        function toggleFoldersView() {
+            isFoldersOpen = !isFoldersOpen;
+            if (isFoldersOpen) {
+                foldersView.classList.add('active');
+                navFoldersBtn.textContent = "Retour";
+                updateFoldersUI();
+            } else {
+                foldersView.classList.remove('active');
+                navFoldersBtn.textContent = "Mes dossiers";
+            }
         }
 
-        function updateSidebarUI() {
+        function updateFoldersUI() {
             foldersList.innerHTML = '';
             const keys = Object.keys(folders);
             if (keys.length === 0) {
-                foldersList.innerHTML = '<p style="color: rgba(255,255,255,0.4); text-align: center; margin-top: 40px;">Aucun dossier pour le moment.</p>';
+                foldersList.innerHTML = '<p style="color: rgba(255,255,255,0.4); text-align: center; margin-top: 60px;">Aucun dossier pour le moment.</p>';
                 return;
             }
 
