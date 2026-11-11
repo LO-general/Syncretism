@@ -214,7 +214,7 @@
             box-shadow: 0 0 20px rgba(139, 92, 246, 0.3);
         }
 
-        /* Barre de saisie ovale épurée (identique page d'origine) */
+        /* Barre de saisie ovale épurée */
         .input-wrapper {
             width: 100%;
             max-width: 600px;
@@ -273,7 +273,7 @@
             background: #6d28d9;
         }
 
-        /* Vue centrale "Mes dossiers" utilisant strictement le même fond et encadré */
+        /* Vue centrale "Mes dossiers" */
         .folders-view {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
@@ -295,6 +295,31 @@
             pointer-events: auto;
         }
 
+        /* Croix de fermeture en haut à droite */
+        .close-folders-btn {
+            position: fixed;
+            top: 24px; right: 24px;
+            background: rgba(30, 20, 50, 0.6);
+            border: 1px solid rgba(139, 92, 246, 0.3);
+            color: #e9d5ff;
+            width: 42px; height: 42px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.4rem;
+            cursor: pointer;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+            z-index: 40;
+        }
+
+        .close-folders-btn:hover {
+            background: rgba(76, 29, 149, 0.8);
+            border-color: rgba(167, 139, 250, 0.7);
+            transform: scale(1.05);
+        }
+
         .folders-header-title {
             font-size: 1.6rem;
             font-weight: 400;
@@ -304,7 +329,7 @@
             text-shadow: 0 2px 20px rgba(139, 92, 246, 0.4);
         }
 
-        /* Barre de recherche des dossiers reprenant exactement le style ovale d'origine */
+        /* Barre de recherche stylisée */
         .search-wrapper {
             width: 100%;
             max-width: 600px;
@@ -354,7 +379,7 @@
             padding-bottom: 30px;
         }
 
-        /* Cartes de dossiers de style verre translucide homogène */
+        /* Cartes de dossiers */
         .folder-card {
             background: rgba(20, 15, 30, 0.6);
             border: 1px solid rgba(139, 92, 246, 0.3);
@@ -468,11 +493,12 @@
         </div>
     </div>
 
-    <!-- Vue Centrale "Mes dossiers" sur le fond dynamique -->
+    <!-- Vue Centrale "Mes dossiers" avec la petite croix en haut à droite -->
     <div class="folders-view" id="foldersView">
+        <button class="close-folders-btn" onclick="toggleFoldersView()" title="Fermer">&times;</button>
         <div class="folders-header-title">Mes Dossiers & Résumés</div>
         
-        <!-- Barre de recherche stylisée à l'identique -->
+        <!-- Barre de recherche stylisée -->
         <div class="search-wrapper">
             <div class="search-box">
                 <input type="text" id="searchInput" placeholder="Rechercher un dossier ou une note..." oninput="updateFoldersUI()" />
@@ -722,7 +748,6 @@
             const searchTerm = searchInput ? searchInput.value.trim().toLowerCase() : '';
             const keys = Object.keys(folders);
             
-            // Filtrer les dossiers selon la recherche
             const filteredKeys = keys.filter(key => {
                 const folder = folders[key];
                 const matchTitle = key.toLowerCase().includes(searchTerm);
