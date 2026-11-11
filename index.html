@@ -187,7 +187,7 @@
             opacity: 0.8;
         }
 
-        /* Boutons du haut (Dossiers + Déconnexion) */
+        /* Boutons du haut */
         .top-nav {
             position: fixed;
             top: 24px; right: 24px;
@@ -273,14 +273,15 @@
             background: #6d28d9;
         }
 
-        /* Panneau Latéral "Mes dossiers" */
+        /* Panneau Latéral "Mes dossiers" - Translucide et harmonisé */
         .sidebar {
             position: fixed;
             top: 0; right: -420px;
             width: 400px; height: 100%;
-            background: rgba(15, 10, 25, 0.92);
+            background: rgba(15, 10, 25, 0.65);
             backdrop-filter: blur(30px);
-            border-left: 1px solid rgba(139, 92, 246, 0.2);
+            -webkit-backdrop-filter: blur(30px);
+            border-left: 1px solid rgba(139, 92, 246, 0.25);
             z-index: 100;
             box-shadow: -20px 0 50px rgba(0, 0, 0, 0.7);
             transition: right 0.4s cubic-bezier(0.16, 1, 0.3, 1);
@@ -296,7 +297,7 @@
             justify-content: space-between;
             align-items: center;
             margin-bottom: 25px;
-            border-bottom: 1px solid rgba(139, 92, 246, 0.2);
+            border-bottom: 1px solid rgba(139, 92, 246, 0.25);
             padding-bottom: 15px;
         }
 
@@ -304,28 +305,60 @@
 
         .close-sidebar {
             background: none; border: none; color: #a78bfa; font-size: 1.5rem; cursor: pointer;
+            transition: transform 0.2s;
         }
+        .close-sidebar:hover { transform: scale(1.1); color: #fff; }
 
         .folders-list {
             flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 15px;
+            padding-right: 5px;
         }
 
+        /* Cartes de dossiers de style verre translucide homogène */
         .folder-card {
-            background: rgba(30, 20, 50, 0.4);
-            border: 1px solid rgba(139, 92, 246, 0.2);
-            border-radius: 12px;
-            padding: 15px;
-            transition: all 0.2s;
+            background: rgba(20, 15, 30, 0.55);
+            border: 1px solid rgba(139, 92, 246, 0.3);
+            border-radius: 16px;
+            padding: 18px;
+            backdrop-filter: blur(15px);
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s ease;
         }
 
         .folder-card:hover {
-            border-color: rgba(167, 139, 250, 0.5);
-            background: rgba(40, 25, 65, 0.5);
+            border-color: rgba(167, 139, 250, 0.7);
+            background: rgba(30, 20, 50, 0.75);
+            box-shadow: 0 0 25px rgba(139, 92, 246, 0.25);
         }
 
-        .folder-title { font-weight: 600; color: #c084fc; margin-bottom: 6px; font-size: 1rem; text-transform: capitalize; }
-        .folder-summary { font-size: 0.85rem; color: #d8b4fe; opacity: 0.9; margin-bottom: 10px; line-height: 1.4; font-style: italic; background: rgba(139, 92, 246, 0.1); padding: 8px 12px; border-radius: 8px; border-left: 3px solid #a78bfa; }
-        .folder-items { font-size: 0.75rem; color: #9ca3af; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 6px; }
+        .folder-title { 
+            font-weight: 500; 
+            color: #ede9fe; 
+            margin-bottom: 8px; 
+            font-size: 1.05rem; 
+            text-transform: capitalize; 
+            letter-spacing: 0.03em;
+        }
+
+        .folder-summary { 
+            font-size: 0.85rem; 
+            color: #d8b4fe; 
+            margin-bottom: 12px; 
+            line-height: 1.4; 
+            font-style: italic; 
+            background: rgba(139, 92, 246, 0.12); 
+            padding: 10px 14px; 
+            border-radius: 10px; 
+            border-left: 3px solid #a78bfa; 
+        }
+
+        .folder-items { 
+            font-size: 0.8rem; 
+            color: #9ca3af; 
+            border-top: 1px solid rgba(139, 92, 246, 0.15); 
+            padding-top: 8px; 
+            line-height: 1.4;
+        }
 
         /* Notification de classement */
         .toast {
@@ -362,7 +395,6 @@
             
             <input type="email" id="authEmail" class="auth-input" placeholder="Adresse email" />
             <input type="password" id="authPassword" class="auth-input" placeholder="Mot de passe" />
-            <!-- Champ de confirmation du mot de passe (visible uniquement à l'inscription) -->
             <input type="password" id="authPasswordConfirm" class="auth-input hidden-field" placeholder="Confirmer le mot de passe" />
             
             <button class="auth-btn" id="authSubmitBtn" onclick="handleAuth()">Se connecter</button>
@@ -408,7 +440,7 @@
     <div class="toast" id="toast">Idée classée dans le dossier !</div>
 
     <script>
-        // Animation des vagues violettes en arrière-plan (Accélérée à 0.008)
+        // Animation des vagues violettes en arrière-plan
         const canvas = document.getElementById('bgCanvas');
         const ctx = canvas.getContext('2d');
         let width, height;
@@ -450,7 +482,7 @@
         }
         drawWaves();
 
-        // Gestion de l'authentification et des utilisateurs multiples
+        // Gestion de l'authentification
         let isRegisterMode = false;
         let currentUser = localStorage.getItem('syncretism_current_user');
 
@@ -537,7 +569,7 @@
             if(sidebar.classList.contains('open')) toggleSidebar();
         }
 
-        // Gestion des dossiers par utilisateur
+        // Gestion des dossiers
         let folders = {};
 
         function loadUserFolders() {
@@ -651,7 +683,6 @@
             });
         }
 
-        // Lancement au démarrage
         checkAuthSession();
     </script>
 </body>
