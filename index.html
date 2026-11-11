@@ -214,7 +214,7 @@
             box-shadow: 0 0 20px rgba(139, 92, 246, 0.3);
         }
 
-        /* Barre de saisie ovale épurée */
+        /* Barre de saisie ovale épurée (identique page d'origine) */
         .input-wrapper {
             width: 100%;
             max-width: 600px;
@@ -273,7 +273,7 @@
             background: #6d28d9;
         }
 
-        /* Vue centrale "Mes dossiers" intégrée sur le fond dynamique */
+        /* Vue centrale "Mes dossiers" utilisant strictement le même fond et encadré */
         .folders-view {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
@@ -282,9 +282,9 @@
             flex-direction: column;
             align-items: center;
             padding: 90px 20px 40px 20px;
-            background: rgba(5, 3, 8, 0.6);
-            backdrop-filter: blur(25px);
-            -webkit-backdrop-filter: blur(25px);
+            background: rgba(5, 3, 8, 0.4);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
             opacity: 0;
             pointer-events: none;
             transition: opacity 0.4s ease;
@@ -302,6 +302,45 @@
             margin-bottom: 20px;
             text-align: center;
             text-shadow: 0 2px 20px rgba(139, 92, 246, 0.4);
+        }
+
+        /* Barre de recherche des dossiers reprenant exactement le style ovale d'origine */
+        .search-wrapper {
+            width: 100%;
+            max-width: 600px;
+            margin-bottom: 25px;
+        }
+
+        .search-box {
+            display: flex;
+            align-items: center;
+            background: rgba(20, 15, 30, 0.65);
+            border: 1px solid rgba(139, 92, 246, 0.3);
+            border-radius: 999px;
+            padding: 12px 20px;
+            backdrop-filter: blur(20px);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .search-box:focus-within {
+            border-color: rgba(167, 139, 250, 0.9);
+            box-shadow: 0 0 35px rgba(139, 92, 246, 0.5);
+            background: rgba(30, 20, 50, 0.85);
+        }
+
+        .search-box input {
+            flex: 1;
+            background: transparent;
+            border: none;
+            outline: none;
+            color: #f3e8ff;
+            font-size: 1rem;
+            padding: 0 10px;
+        }
+
+        .search-box input::placeholder {
+            color: rgba(216, 180, 254, 0.4);
         }
 
         .folders-container {
@@ -432,6 +471,15 @@
     <!-- Vue Centrale "Mes dossiers" sur le fond dynamique -->
     <div class="folders-view" id="foldersView">
         <div class="folders-header-title">Mes Dossiers & Résumés</div>
+        
+        <!-- Barre de recherche stylisée à l'identique -->
+        <div class="search-wrapper">
+            <div class="search-box">
+                <input type="text" id="searchInput" placeholder="Rechercher un dossier ou une note..." oninput="updateFoldersUI()" />
+                <svg width="16" height="16" fill="none" stroke="rgba(216, 180, 254, 0.6)" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"></circle><path d="M21 21l-4.35-4.35"></path></svg>
+            </div>
+        </div>
+
         <div class="folders-container" id="foldersList"></div>
     </div>
 
@@ -592,6 +640,7 @@
         const header = document.getElementById('mainHeader');
         const foldersView = document.getElementById('foldersView');
         const foldersList = document.getElementById('foldersList');
+        const searchInput = document.getElementById('searchInput');
         const navFoldersBtn = document.getElementById('navFoldersBtn');
         const toast = document.getElementById('toast');
         let isFoldersOpen = false;
@@ -660,6 +709,7 @@
             if (isFoldersOpen) {
                 foldersView.classList.add('active');
                 navFoldersBtn.textContent = "Retour";
+                searchInput.value = '';
                 updateFoldersUI();
             } else {
                 foldersView.classList.remove('active');
@@ -669,13 +719,24 @@
 
         function updateFoldersUI() {
             foldersList.innerHTML = '';
+            const searchTerm = searchInput ? searchInput.value.trim().toLowerCase() : '';
             const keys = Object.keys(folders);
-            if (keys.length === 0) {
-                foldersList.innerHTML = '<p style="color: rgba(255,255,255,0.4); text-align: center; margin-top: 60px;">Aucun dossier pour le moment.</p>';
+            
+            // Filtrer les dossiers selon la recherche
+            const filteredKeys = keys.filter(key => {
+                const folder = folders[key];
+                const matchTitle = key.toLowerCase().includes(searchTerm);
+                const matchSummary = folder.summary.toLowerCase().includes(searchTerm);
+                const matchItems = folder.items.some(item => item.toLowerCase().includes(searchTerm));
+                return matchTitle || matchSummary || matchItems;
+            });
+
+            if (filteredKeys.length === 0) {
+                foldersList.innerHTML = '<p style="color: rgba(255,255,255,0.4); text-align: center; margin-top: 40px;">Aucun dossier trouvé.</p>';
                 return;
             }
 
-            keys.forEach(key => {
+            filteredKeys.forEach(key => {
                 const folder = folders[key];
                 const notesListHTML = folder.items.map(item => `• ${item}`).join('<br>');
                 
