@@ -23,30 +23,23 @@
             color: #f3e8ff;
         }
 
-        /* Fond animé fluide aux ondes violettes */
-        .bg-canvas {
+        /* Arrière-plan vidéo en boucle (Catbox) */
+        .bg-video {
             position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
+            top: 50%; left: 50%;
+            min-width: 100%; min-height: 100%;
+            width: auto; height: auto;
+            transform: translate(-50%, -50%);
+            object-fit: cover;
             z-index: 1;
-            background: radial-gradient(circle at 30% 30%, #1e1135 0%, #0a0512 50%, #030107 100%);
-        }
-
-        .wave-layer {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            z-index: 2;
-            opacity: 0.6;
             pointer-events: none;
-            background: 
-                radial-gradient(ellipse at 80% 20%, rgba(139, 92, 246, 0.15) 0%, transparent 50%),
-                radial-gradient(ellipse at 20% 80%, rgba(88, 28, 135, 0.25) 0%, transparent 60%);
         }
 
         .overlay-gradient {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
-            background: radial-gradient(circle at 50% 70%, rgba(76, 29, 149, 0.1), rgba(5, 3, 8, 0.85) 85%);
-            z-index: 3;
+            background: radial-gradient(circle at 50% 50%, rgba(30, 10, 50, 0.4), rgba(5, 3, 8, 0.85) 90%);
+            z-index: 2;
             pointer-events: none;
         }
 
@@ -447,9 +440,10 @@
 </head>
 <body>
 
-    <!-- Arrière-plan animé fluide -->
-    <canvas class="bg-canvas" id="bgCanvas"></canvas>
-    <div class="wave-layer"></div>
+    <!-- Arrière-plan vidéo en boucle (Catbox) -->
+    <video autoplay muted loop playsinline class="bg-video">
+        <source src="https://files.catbox.moe/dc1gog.mp4" type="video/mp4">
+    </video>
     <div class="overlay-gradient"></div>
 
     <!-- Écran de Connexion / Inscription -->
@@ -512,49 +506,7 @@
     <div class="toast" id="toast">Idée classée dans le dossier !</div>
 
     <script>
-        // Animation des vagues violettes en arrière-plan
-        const canvas = document.getElementById('bgCanvas');
-        const ctx = canvas.getContext('2d');
-        let width, height;
-        let step = 0;
-
-        function resize() {
-            width = canvas.width = window.innerWidth;
-            height = canvas.height = window.innerHeight;
-        }
-        window.addEventListener('resize', resize);
-        resize();
-
-        function drawWaves() {
-            ctx.clearRect(0, 0, width, height);
-            step += 0.008;
-
-            for (let i = 0; i < 4; i++) {
-                ctx.beginPath();
-                ctx.moveTo(0, height);
-                
-                for (let x = 0; x < width; x += 20) {
-                    let y = height * 0.5 + 
-                            Math.sin(x * 0.003 + step + i) * 80 + 
-                            Math.cos(x * 0.002 - step * 0.5) * 60 + 
-                            i * 50;
-                    ctx.lineTo(x, y);
-                }
-                
-                ctx.lineTo(width, height);
-                ctx.closePath();
-
-                let grad = ctx.createLinearGradient(0, 0, width, height);
-                grad.addColorStop(0, `rgba(76, 29, 149, ${0.08 + i * 0.04})`);
-                grad.addColorStop(1, `rgba(20, 10, 35, ${0.4 + i * 0.1})`);
-                ctx.fillStyle = grad;
-                ctx.fill();
-            }
-            requestAnimationFrame(drawWaves);
-        }
-        drawWaves();
-
-        // Gestion de l'authentification
+        // Gestion de l'authentification et des utilisateurs multiples
         let isRegisterMode = false;
         let currentUser = localStorage.getItem('syncretism_current_user');
 
