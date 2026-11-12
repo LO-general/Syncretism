@@ -13,6 +13,9 @@
       gtag('js', new Date());
     </script>
 
+    <!-- SDK Supabase -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body, html {
@@ -23,7 +26,7 @@
             color: #f3e8ff;
         }
 
-        /* Fond animé fluide aux ondes violettes (version d'origine rétablie) */
+        /* Fond animé fluide aux ondes violettes d'origine */
         .bg-canvas {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
@@ -447,7 +450,7 @@
 </head>
 <body>
 
-    <!-- Arrière-plan animé fluide d'origine -->
+    <!-- Arrière-plan animé fluide -->
     <canvas class="bg-canvas" id="bgCanvas"></canvas>
     <div class="wave-layer"></div>
     <div class="overlay-gradient"></div>
@@ -512,7 +515,12 @@
     <div class="toast" id="toast">Idée classée dans le dossier !</div>
 
     <script>
-        // Animation des vagues violettes en arrière-plan rétablie
+        // Initialisation de Supabase
+        const SUPABASE_URL = 'https://lemarquandquetard.supabase.co';
+        const SUPABASE_ANON_KEY = 'sb_publishable_-9Ww5TjE2ymqlAsA2mqiLQ_8cKQo8dw';
+        const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        // Animation des vagues violettes en arrière-plan
         const canvas = document.getElementById('bgCanvas');
         const ctx = canvas.getContext('2d');
         let width, height;
@@ -554,7 +562,7 @@
         }
         drawWaves();
 
-        // Gestion de l'authentification et des utilisateurs multiples
+        // Gestion de l'authentification avec Supabase
         let isRegisterMode = false;
         let currentUser = localStorage.getItem('syncretism_current_user');
 
@@ -595,7 +603,7 @@
             }
         }
 
-        function handleAuth() {
+        async function handleAuth() {
             const email = authEmail.value.trim().toLowerCase();
             const password = authPassword.value.trim();
             const passwordConfirm = authPasswordConfirm.value.trim();
@@ -605,60 +613,79 @@
                 return;
             }
 
-            let users = JSON.parse(localStorage.getItem('syncretism_users_db')) || {};
-
             if (isRegisterMode) {
                 if (password !== passwordConfirm) {
                     alert("Les mots de passe ne correspondent pas. Veuillez vérifier.");
                     return;
                 }
-                if (users[email]) {
-                    alert("Cet email existe déjà. Veuillez vous connecter.");
-                    return;
+                const { error } = await supabaseClient.auth.signUp({ email, password });
+                if (error) {
+                    alert("Erreur lors de l'inscription : " + error.message);
+                } else {
+                    alert("Compte créé avec succès ! Connectez-vous.");
+                    toggleAuthMode();
                 }
-                users[email] = { password: password, folders: {} };
-                localStorage.setItem('syncretism_users_db', JSON.stringify(users));
-                alert("Compte créé avec succès ! Connectez-vous.");
-                toggleAuthMode();
             } else {
-                if (!users[email] || users[email].password !== password) {
+                const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
+                if (error) {
                     alert("Email ou mot de passe incorrect.");
-                    return;
+                } else {
+                    currentUser = data.user.email;
+                    localStorage.setItem('syncretism_current_user', currentUser);
+                    authEmail.value = '';
+                    authPassword.value = '';
+                    authPasswordConfirm.value = '';
+                    checkAuthSession();
                 }
-                currentUser = email;
-                localStorage.setItem('syncretism_current_user', currentUser);
-                authEmail.value = '';
-                authPassword.value = '';
-                authPasswordConfirm.value = '';
-                checkAuthSession();
             }
         }
 
-        function logout() {
+        async function logout() {
+            await supabaseClient.auth.signOut();
             localStorage.removeItem('syncretism_current_user');
             currentUser = null;
+            folders = {};
             authContainer.classList.remove('hidden');
             if(foldersView.classList.contains('active')) toggleFoldersView();
         }
 
-        // Gestion des dossiers
+        // Gestion des dossiers connectés à Supabase
         let folders = {};
 
-        function loadUserFolders() {
+        async function loadUserFolders() {
             if (!currentUser) return;
-            let users = JSON.parse(localStorage.getItem('syncretism_users_db')) || {};
-            if (users[currentUser]) {
-                folders = users[currentUser].folders || {};
+            const { data, error } = await supabaseClient
+                .from('user_folders')
+                .select('folders_data')
+                .eq('email', currentUser)
+                .single();
+
+            if (data && data.folders_data) {
+                folders = data.folders_data;
+            } else {
+                folders = {};
             }
             updateFoldersUI();
         }
 
-        function saveUserFolders() {
+        async function saveUserFolders() {
             if (!currentUser) return;
-            let users = JSON.parse(localStorage.getItem('syncretism_users_db')) || {};
-            if (users[currentUser]) {
-                users[currentUser].folders = folders;
-                localStorage.setItem('syncretism_users_db', JSON.stringify(users));
+            // On vérifie d'abord si une ligne existe pour cet utilisateur
+            const { data } = await supabaseClient
+                .from('user_folders')
+                .select('email')
+                .eq('email', currentUser)
+                .single();
+
+            if (data) {
+                await supabaseClient
+                    .from('user_folders')
+                    .update({ folders_data: folders })
+                    .eq('email', currentUser);
+            } else {
+                await supabaseClient
+                    .from('user_folders')
+                    .insert([{ email: currentUser, folders_data: folders }]);
             }
         }
 
@@ -697,7 +724,7 @@
             }
         }
 
-        function submitIdea() {
+        async function submitIdea() {
             const text = inputField.value.trim();
             if (!text) return;
 
@@ -714,7 +741,7 @@
             folders[folderName].items.push(cleanContent);
             folders[folderName].summary = generateAISummary(folders[folderName].items);
 
-            saveUserFolders();
+            await saveUserFolders();
 
             inputField.value = '';
             header.classList.remove('hidden');
