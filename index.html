@@ -450,7 +450,7 @@
 </head>
 <body>
 
-    <!-- Arrière-plan animé fluide -->
+    <!-- Arrière-plan animé fluide d'origine -->
     <canvas class="bg-canvas" id="bgCanvas"></canvas>
     <div class="wave-layer"></div>
     <div class="overlay-gradient"></div>
@@ -515,8 +515,8 @@
     <div class="toast" id="toast">Idée classée dans le dossier !</div>
 
     <script>
-        // Initialisation de Supabase
-        const SUPABASE_URL = 'https://lemarquandquetard.supabase.co';
+        // Initialisation de Supabase avec tes vraies clés
+        const SUPABASE_URL = 'https://iomdnriabnkpqtrwrvwd.supabase.co';
         const SUPABASE_ANON_KEY = 'sb_publishable_-9Ww5TjE2ymqlAsA2mqiLQ_8cKQo8dw';
         const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
@@ -649,7 +649,7 @@
             if(foldersView.classList.contains('active')) toggleFoldersView();
         }
 
-        // Gestion des dossiers connectés à Supabase
+        // Gestion des dossiers synchronisés avec Supabase
         let folders = {};
 
         async function loadUserFolders() {
@@ -670,7 +670,6 @@
 
         async function saveUserFolders() {
             if (!currentUser) return;
-            // On vérifie d'abord si une ligne existe pour cet utilisateur
             const { data } = await supabaseClient
                 .from('user_folders')
                 .select('email')
